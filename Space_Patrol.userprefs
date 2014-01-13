@@ -1,0 +1,19 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Done/Done_Scripts/Done_DestroyByTime.cs">
+    <Files>
+      <File FileName="Assets/Scripts/CShields.cs" Line="13" Column="1" />
+      <File FileName="Assets/Scripts/CMover.cs" Line="26" Column="1" />
+      <File FileName="Assets/Scripts/CDestroyByBoundry.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CDestroyByContact.cs" Line="52" Column="9" />
+      <File FileName="Assets/Scripts/CRandomRotator.cs" Line="1" Column="1" />
+      <File FileName="Assets/Done/Done_Scripts/Done_DestroyByContact.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CGameController.cs" Line="16" Column="33" />
+      <File FileName="Assets/Done/Done_Scripts/Done_DestroyByTime.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
