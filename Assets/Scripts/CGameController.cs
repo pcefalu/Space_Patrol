@@ -23,7 +23,6 @@ public class CGameController : MonoBehaviour
 	public float          WaveWait;
 	
 	public GUIText        ScoreText;
-	public GUIText        RestartText;
 	public GUIText        GameOverText;
 	
 	private bool          m_bGameOver;
@@ -38,7 +37,6 @@ public class CGameController : MonoBehaviour
 		
 		m_bGameOver          = false;
 		m_bRestart           = false;
-		RestartText.text     = "";
 		GameOverText.text    = "";
 		m_intScore           = 0;
 
@@ -54,13 +52,13 @@ public class CGameController : MonoBehaviour
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if (m_bRestart)
-		{
-			if (Input.GetKeyDown (KeyCode.R))
-			{
-				Application.LoadLevel (Application.loadedLevel);
-			}
-		}
+//		if (m_bRestart)
+//		{
+//			if (Input.GetKeyDown (KeyCode.R))
+//			{
+//				Application.LoadLevel (Application.loadedLevel);
+//			}
+//		}
 		
 		//------------------------------------------------------
 	}	// End of Update Method
@@ -88,8 +86,7 @@ public class CGameController : MonoBehaviour
 			
 			if (m_bGameOver)
 			{
-				RestartText.text = "Press 'R' for Restart";
-				m_bRestart = true;
+				Application.LoadLevel (CButtonPressed.HOME_SCENE_SCREEN);
 				break;
 			}
 		}

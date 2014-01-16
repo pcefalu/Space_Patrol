@@ -36,27 +36,57 @@ public class CPlayerController : MonoBehaviour
 	{	// Process the Fire Laser Bolt Requests
 		//------------------------------------------------------
 		
-		if (Input.GetButton("Fire1") && Time.time > m_sngNextFire) 
-		{
-			m_sngNextFire = Time.time + FireRate;
-			Instantiate(Shot, ShotSpawn.position, ShotSpawn.rotation);
-			audio.Play ();
-		}
+//		if (Input.GetButton("Fire1") && Time.time > m_sngNextFire) 
+//		{
+//			FireLaser();
+//		}
 		
 		//------------------------------------------------------
 	}	// End of Update Method
 
 	
 	//========================================================================
+	public void FireLaser ()
+	{	// Process the Fire Laser Bolt Requests
+		//------------------------------------------------------
+		
+		m_sngNextFire = Time.time + FireRate;
+		Instantiate(Shot, ShotSpawn.position, ShotSpawn.rotation);
+		audio.Play ();
+
+		//------------------------------------------------------
+	}	// End of FireLaser Method
+	
+	
+	//========================================================================
+	public float NextFire ()
+	{	// Process the Fire Laser Bolt Requests
+		//------------------------------------------------------
+		
+		return m_sngNextFire;
+		
+		//------------------------------------------------------
+	}	// End of NextFire Method
+	
+	
+	//========================================================================
 	void FixedUpdate ()
+	{	// Set Shields to Full Strength
+		//------------------------------------------------------
+		
+		//MoveShip ();
+
+		//------------------------------------------------------
+	}	// End of FixedUpdate Method
+
+
+	//========================================================================
+	public void MoveShip ()
 	{	// Set Shields to Full Strength
 		//------------------------------------------------------
 		
 		float sngMoveHorizontal  = Input.GetAxis ("Horizontal");
 		float sngMoveVertical    = Input.GetAxis ("Vertical");
-		
-//		float sngMoveHorizontal  = Input.GetAxis ("Mouse X");
-//		float sngMoveVertical    = Input.GetAxis ("Mouse Y");
 		
 		Vector3 sngMovement      = new Vector3 (sngMoveHorizontal, 0.0f, sngMoveVertical);
 		rigidbody.velocity       = sngMovement * Speed;
@@ -66,43 +96,14 @@ public class CPlayerController : MonoBehaviour
 				Mathf.Clamp (rigidbody.position.x, Boundary.XMin, Boundary.XMax), 
 				0.0f, 
 				Mathf.Clamp (rigidbody.position.z, Boundary.ZMin, Boundary.ZMax)
-			);
+				);
 		
 		rigidbody.rotation  = Quaternion.Euler (0.0f, 0.0f, rigidbody.velocity.x * -Tilt);
-		
+
 		//------------------------------------------------------
-	}	// End of FixedUpdate Method
-
-
-//	//========================================================================
-//	void FixedUpdate () 
-//	{	// Track Ship to follow Fingure on Touch Screen
-//		//----------------------------------------------------------
-//		
-//		if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) 
-//		{	// Get movement of the finger since last frame
-//			//----------------------------------------------------------
-//			Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
-//
-//			float moveHorizontal  = -touchDeltaPosition.x;
-//			float moveVertical    = -touchDeltaPosition.y;
-//			
-//			Vector3 movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
-//			rigidbody.velocity = movement * Speed;
-//			
-//			rigidbody.position = new Vector3
-//				(
-//					Mathf.Clamp (rigidbody.position.x, Boundary.XMin, Boundary.XMax), 
-//					0.0f, 
-//					Mathf.Clamp (rigidbody.position.z, Boundary.ZMin, Boundary.ZMax)
-//				);
-//			
-//			rigidbody.rotation = Quaternion.Euler (0.0f, 0.0f, rigidbody.velocity.x * -Tilt);
-//			
-//		}
-//		
-//		//----------------------------------------------------------
-//	}	// End of FixedUpdate Method
+	}	// End of MoveShip Method
+	
+	
 
 	
 	
