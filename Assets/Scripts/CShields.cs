@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
@@ -12,7 +13,7 @@ public enum eEnergyLevels
 
 //****************************************************************************
 [System.Serializable]
-public class CShields : MonoBehaviour
+public class CShields : Photon.MonoBehaviour
 {	// Declare Data Members
 	//----------------------------------------------------------
 	

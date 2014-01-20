@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
@@ -8,18 +9,28 @@ public class CFireButtonPressed : CButtonTouchLogic
 	//----------------------------------------------------------
 	
 	private  CPlayerController  m_oPlayerController;
-
-
+	private  GameObject         m_oGameControllerObject;
+	
+	
 	//========================================================================
 	void Start ()
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		GameObject gameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player_1");
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		}
 		
-		if (gameControllerObject != null)
+		if (m_oGameControllerObject != null)
 		{
-			m_oPlayerController = gameControllerObject.GetComponent <CPlayerController>();
+			m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
 		}
 		
 		if (m_oPlayerController == null)

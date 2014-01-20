@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
-public class CDestroyByContact : MonoBehaviour 
+public class CDestroyByContact : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	
@@ -77,7 +78,7 @@ public class CDestroyByContact : MonoBehaviour
 				}
 				else
 				{
-					if (other.tag == "Player")
+					if (other.tag == "Player" || other.tag == "Player_1" || other.tag == "Player_2")
 					{
 						Instantiate(Explosion, transform.position, transform.rotation);
 						Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
@@ -93,6 +94,19 @@ public class CDestroyByContact : MonoBehaviour
 					Destroy (gameObject);
 				}
 			}
+			
+			if(gameObject.tag == "Player_1" || gameObject.tag == "Player_2")
+			{
+				if (other.tag == "Player_1" || other.tag == "Player_2")
+				{
+					Instantiate(PlayerExplosion, transform.position, transform.rotation);
+					Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
+					m_oGameController.GameOver();
+					
+					Destroy (other.gameObject);
+					Destroy (gameObject);
+				}
+			}
 		}
 		
 		//------------------------------------------------------
@@ -101,3 +115,16 @@ public class CDestroyByContact : MonoBehaviour
 	
 	//----------------------------------------------------------
 }	// End of CDestroyByContact Class
+
+
+
+
+
+
+
+
+
+
+
+
+

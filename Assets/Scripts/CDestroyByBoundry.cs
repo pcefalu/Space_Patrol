@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
-public class CDestroyByBoundry : MonoBehaviour 
+public class CDestroyByBoundry : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	

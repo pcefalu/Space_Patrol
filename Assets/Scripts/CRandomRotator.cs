@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
-public class CRandomRotator : MonoBehaviour 
+public class CRandomRotator : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	

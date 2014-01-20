@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
-public class CHomeScreenCleanUp : MonoBehaviour 
+public class CHomeScreenCleanUp : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	

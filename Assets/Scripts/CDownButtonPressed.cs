@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
@@ -8,6 +9,7 @@ public class CDownButtonPressed : CButtonTouchLogic
 	//----------------------------------------------------------
 	
 	private  CPlayerController  m_oPlayerController;
+	private  GameObject         m_oGameControllerObject;
 	
 	
 	//========================================================================
@@ -15,11 +17,20 @@ public class CDownButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		GameObject gameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player_1");
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		}
 		
-		if (gameControllerObject != null)
+		if (m_oGameControllerObject != null)
 		{
-			m_oPlayerController = gameControllerObject.GetComponent <CPlayerController>();
+			m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
 		}
 		
 		if (m_oPlayerController == null)
@@ -32,14 +43,36 @@ public class CDownButtonPressed : CButtonTouchLogic
 	
 	
 	//========================================================================
+	void OnMouseDown()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if(m_oPlayerController != null) MoveShip(-1);
+		
+		//------------------------------------------------------
+	}	// End of OnMouseUp Method
+	
+	
+	//========================================================================
 	void OnMouseUp()
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip();
+		if(m_oPlayerController != null) MoveShip(0);
 		
 		//------------------------------------------------------
 	}	// End of OnMouseUp Method
+	
+	
+	//========================================================================
+	void OnTouchBegin()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if(m_oPlayerController != null) MoveShip(-1);
+		
+		//------------------------------------------------------
+	}	// End of OnTouchBegin Method
 	
 	
 	//========================================================================
@@ -47,24 +80,22 @@ public class CDownButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip();
+		if(m_oPlayerController != null) MoveShip(0);
 		
 		//------------------------------------------------------
 	}	// End of OnTouchEnded Method
 	
 	
 	//========================================================================
-	void MoveShip()
+	void MoveShip(float sngValue)
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		m_oPlayerController.MoveShip();
-		
-		Debug.Log ("Move Down Button Pressed...");
+		m_oPlayerController.MoveShipVertical(sngValue);
 		
 		//------------------------------------------------------
-	}	// End of OnTouchEnded Method
-	
+	}	// End of MoveShip Method
+
 	
 	//----------------------------------------------------------
 }	// End of CDownButtonPressed Class

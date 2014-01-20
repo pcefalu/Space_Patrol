@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
 [System.Serializable]
-public class CButtonTouchLogic : MonoBehaviour 
+[RequireComponent(typeof(PhotonView))]
+public class CButtonTouchLogic : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	

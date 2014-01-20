@@ -121,12 +121,14 @@
      <Compile Include="Assets\Photon Unity Networking\UtilityScripts\SmoothSyncMovement.cs" />
      <Compile Include="Assets\Photon Unity Networking\UtilityScripts\TestDontDestroyOnLoad.cs" />
      <Compile Include="Assets\Photon Unity Networking\UtilityScripts\TimeKeeper.cs" />
-     <Compile Include="Assets\Scripts\CButtonPressed.cs" />
      <Compile Include="Assets\Scripts\CButtonTouchLogic.cs" />
+     <Compile Include="Assets\Scripts\CCancelWaitButton.cs" />
      <Compile Include="Assets\Scripts\CDestroyByBoundry.cs" />
      <Compile Include="Assets\Scripts\CDestroyByContact.cs" />
      <Compile Include="Assets\Scripts\CDestroyByTime.cs" />
      <Compile Include="Assets\Scripts\CDownButtonPressed.cs" />
+     <Compile Include="Assets\Scripts\CExitGameButton.cs" />
+     <Compile Include="Assets\Scripts\CExitGameMode.cs" />
      <Compile Include="Assets\Scripts\CFireButtonPressed.cs" />
      <Compile Include="Assets\Scripts\CGameController.cs" />
      <Compile Include="Assets\Scripts\CHomeController.cs" />
@@ -137,6 +139,10 @@
      <Compile Include="Assets\Scripts\CRandomRotator.cs" />
      <Compile Include="Assets\Scripts\CRightButtonPressed.cs" />
      <Compile Include="Assets\Scripts\CShields.cs" />
+     <Compile Include="Assets\Scripts\CSinglePlayerButton.cs" />
+     <Compile Include="Assets\Scripts\CSinglePlayerMode.cs" />
+     <Compile Include="Assets\Scripts\CTeamPlayerButton.cs" />
+     <Compile Include="Assets\Scripts\CTeamPlayerMode.cs" />
      <Compile Include="Assets\Scripts\CUpButtonPressed.cs" />
      <None Include="Assets\Photon Unity Networking\Demos\MarcoPolo-Tutorial\marcopolo-readme.txt" />
      <None Include="Assets\Plugins\release_history.txt" />

@@ -1,13 +1,35 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CDestroyByBoundry.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CGameController.cs">
     <Files>
-      <File FileName="Assets/Scripts/CPlayerController.cs" Line="58" Column="23" />
-      <File FileName="Assets/Scripts/CButtonPressed.cs" Line="43" Column="1" />
-      <File FileName="Assets/Scripts/CFireButtonPressed.cs" Line="28" Column="35" />
-      <File FileName="Assets/Scripts/CGameController.cs" Line="89" Column="1" />
-      <File FileName="Assets/Scripts/CDestroyByBoundry.cs" Line="40" Column="32" />
-      <File FileName="Assets/Scripts/CHomeController.cs" Line="24" Column="3" />
+      <File FileName="Assets/Scripts/CPlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CFireButtonPressed.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CGameController.cs" Line="151" Column="24" />
+      <File FileName="Assets/Scripts/CDestroyByBoundry.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CHomeController.cs" Line="88" Column="1" />
+      <File FileName="Assets/Scripts/CLeftButtonPressed.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CButtonTouchLogic.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CRightButtonPressed.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CDownButtonPressed.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CUpButtonPressed.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CTeamPlayerButton.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CSinglePlayerButton.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CDestroyByContact.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CDestroyByTime.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CHomeScreenCleanUp.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CMover.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CRandomRotator.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CShields.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/UtilityScripts/ConnectAndJoinRandom.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/Plugins/PhotonNetwork/PhotonLagSimulationGui.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CExitGameButton.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CCancelWaitButton.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CSinglePlayerMode.cs" Line="14" Column="1" />
+      <File FileName="Assets/Scripts/CTeamPlayerMode.cs" Line="117" Column="5" />
+      <File FileName="Assets/Scripts/CExitGameMode.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/Demos/MarcoPolo-Tutorial/ClickDetector.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewInspector.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/Editor/PhotonNetwork/ServerSettingsInspector.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

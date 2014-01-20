@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using System.Collections;
 
 //****************************************************************************
-public class CHomeController : MonoBehaviour 
+public class CHomeController : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
 	
@@ -13,29 +14,36 @@ public class CHomeController : MonoBehaviour
 	public float          StartWait;
 	public float          WaveWait;
 	
+	private bool          m_bDisableButtons;
+	private bool          m_bExitGame;
 	private bool          m_bGameOver;
 	private bool          m_bRestart;
-
 	
+	public const int HOME_SCENE_SCREEN = 0;
+	public const int MAIN_SCENE_SCREEN = 1;
+	
+
 	//========================================================================
 	void Start ()
 	{	// Declare Variables
 		//------------------------------------------------------
 
-		m_bGameOver  = false;
+		m_bGameOver        = false;
+		m_bExitGame        = false;
+		m_bDisableButtons  = false;
 
 		StartCoroutine (SpawnWaves ());
 		
 		//------------------------------------------------------
 	}	// End of Start Method
-
-
+	
+	
 	//========================================================================
 	IEnumerator SpawnWaves ()
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		yield return new WaitForSeconds (StartWait);
+//		yield return new WaitForSeconds (StartWait);
 		while (true)
 		{
 			for (int i = 0; i < HazardCount; i++)
@@ -52,13 +60,29 @@ public class CHomeController : MonoBehaviour
 
 			if (m_bGameOver)
 			{
-				Application.LoadLevel (CButtonPressed.MAIN_SCENE_SCREEN);
+				PhotonNetwork.LoadLevel(MAIN_SCENE_SCREEN);
+				break;
+			}
+			
+			if (m_bExitGame)
+			{
 				break;
 			}
 		}
 		
 		//------------------------------------------------------
 	}	// End of SpawnWaves Method
+	
+	
+	//========================================================================
+	void OnLevelWasLoaded (int level)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		PhotonNetwork.networkingPeer.NewSceneLoaded();
+		
+		//------------------------------------------------------
+	}	// End of OnLevelWasLoaded Method
 	
 	
 	//========================================================================
@@ -72,5 +96,50 @@ public class CHomeController : MonoBehaviour
 	}	// End of GameOver Method
 	
 	
+	//========================================================================
+	public void ExitGame ()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		m_bExitGame = true;
+		
+		//------------------------------------------------------
+	}	// End of GameOver Method
+	
+	
+	//========================================================================
+	public void SetDisableButtons (bool bState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		m_bDisableButtons  = bState;
+		
+		//------------------------------------------------------
+	}	// End of SetDisableButtons Method
+	
+	
+	//========================================================================
+	public bool IsDisableButtons ()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		return m_bDisableButtons;
+		
+		//------------------------------------------------------
+	}	// End of IsDisableButtons Method
+	
+	
 	//----------------------------------------------------------
 }	// End of CHomeController Class
+
+
+
+
+
+
+
+
+
+
+
+
