@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 using System.Collections;
 
@@ -25,9 +26,7 @@ public class CGameController : Photon.MonoBehaviour
 
 	public GameObject     Player_2;
 	public Vector3        TeamPosition_2;
-	
-	public GameObject     PlayerExplosion;
-	
+
 	public GameObject[]   Hazards;
 	public Vector3        SpawnValues;
 	public int            HazardCount;
@@ -38,20 +37,21 @@ public class CGameController : Photon.MonoBehaviour
 	public GUITexture     FireButton;
 	public GUIText        ScoreText;
 	public GUIText        GameOverText;
-	
+
 	private bool          m_bGameOver;
 	private bool          m_bUpdate;
+
 	private int           m_intScore;
 	private int           m_intSyncMainScene;
 
-	private CharacterState  m_oCharacterState;
+	private GameObject    m_oPlayer;
+	private GameObject    m_oNetworkPlayer;
 
-	private GameObject      m_oPlayer;
-	private GameObject      m_oPlayer_1;
-	private GameObject      m_oPlayer_2;
+//	private  CharacterState     m_eCharacterState;
+	private  CPlayerController  m_oPlayerController;
 
-	private const int     MAIN_NOT_ASSIGNED = 0;
-	private const int     MAIN_SCENE_SYNCED = 2;
+	private const int     MAIN_NOT_ASSIGNED   = 0;
+	private const int     MAIN_SCENE_SYNCED   = 2;
 
 	
 	//========================================================================
@@ -59,25 +59,24 @@ public class CGameController : Photon.MonoBehaviour
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		m_bGameOver          = false;
-		m_bUpdate            = false;
-		GameOverText.text    = "";
-		m_intScore           = 0;
+		m_bGameOver        = false;
+		m_bUpdate          = false;
 
-		UpdateScore ();
+		GameOverText.text  = "";
+		m_intScore         = 0;
+		ScoreText.text     = "Score: " + m_intScore;
+
 		StartCoroutine (SpawnWaves ());
 		
 		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
 		{	// Team Player Mode
 			//--------------------------------------------------
 			m_intSyncMainScene = MAIN_NOT_ASSIGNED;
-			CreateNetworkPlayerObject (TeamPosition_1, TeamPosition_2, PlayerRotation);
 		}
 		else
 		{	// Single Player Mode
 			//--------------------------------------------------
 			m_intSyncMainScene = MAIN_SCENE_SYNCED;
-			CreatePlayerObject (PlayerPosition, PlayerRotation);
 		}
 
 		//------------------------------------------------------
@@ -91,63 +90,207 @@ public class CGameController : Photon.MonoBehaviour
 		
 		if (m_bUpdate) 
 		{
-			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-			{
-				PhotonView oPhotonView = PhotonView.Get (this);
-				oPhotonView.RPC ("RemoteSceneHasLoaded", PhotonTargets.All, CHomeController.MAIN_SCENE_SCREEN);
-			}
+			SendRemoteSceneHasLoaded(PlayerPrefs.GetInt("Main_Scene"));
+			
+			Debug.Log ("Update()\nSceneID= " + PlayerPrefs.GetInt("Main_Scene").ToString ());
 		} 
-//		else 
-//		{
-//			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-//				PhotonNetwork.SendOutgoingCommands();
-//		}
 
 		//------------------------------------------------------
 	}	// End of Update Method
 	
 	
 	//========================================================================
-	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{	// Declare Variables
 		//------------------------------------------------------
-
+		
 		if (stream.isWriting)
 		{	// We own this player: send the others our data
 			//--------------------------------------------------
-			stream.SendNext((int)this.m_oCharacterState);
-			stream.SendNext(m_oPlayer_1.transform.position);
-			stream.SendNext(m_oPlayer_1.transform.rotation);
+			stream.SendNext((int)m_intScore);
+
+			ScoreText.text = "Score: " + m_intScore;
 		}
 		else
 		{	// Network player, receive data
 			//--------------------------------------------------
-			this.m_oCharacterState           = (CharacterState)(int)stream.ReceiveNext();
-
-			Vector3 oRemotePosition          = (Vector3)stream.ReceiveNext();
-			Vector3 oLocalPosition           = new Vector3(0, 0, 0);
-
-			oLocalPosition.x                 = -oRemotePosition.x;
-			oLocalPosition.y                 = oRemotePosition.y;
-			oLocalPosition.z                 = oRemotePosition.z;
-
-
-			m_oPlayer_2.transform.position   = oLocalPosition;
-			m_oPlayer_2.transform.rotation   = (Quaternion)stream.ReceiveNext();
-
-//			Quaternion oRemoteRotation       = (Quaternion)stream.ReceiveNext();
-//			Quaternion oLocalRotation        = new Quaternion();
-//			
-//			oLocalRotation.x                 = -oRemoteRotation.x;
-//			oLocalRotation.y                 = oRemoteRotation.y;
-//			oLocalRotation.z                 = oRemoteRotation.z;
-//			oLocalRotation.w                 = oRemoteRotation.w;
-//
-//			m_oPlayer_2.transform.rotation   = oLocalRotation;
+			ScoreText.text  = "Score: " + (int)stream.ReceiveNext();
+		}
+		
+		//------------------------------------------------------
+	}	// End of OnPhotonSerializeView Method
+	
+	
+	//========================================================================
+	public void SendRemoteLaserControl(int intState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oNetworkPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.SendRemoteLaserControl(intState);
+				Debug.Log ("CGameController.SendRemoteLaserControl()\nState= " + intState.ToString());
+			}
 		}
 
 		//------------------------------------------------------
-	}	// End of OnPhotonSerializeView Method
+	}	// End of SendRemoteFireLaser Method
+	
+	
+	//========================================================================
+	public void SendRemoteFireLaser(int intState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oNetworkPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.SendRemoteFireLaser(intState);
+			}
+		}
+
+		//------------------------------------------------------
+	}	// End of SendRemoteFireLaser Method
+	
+	
+	//========================================================================
+	public void FireLaser(int intState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oNetworkPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.FireLaser(intState);
+			}
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.FireLaser(intState);
+			}
+		}
+
+		//------------------------------------------------------
+	}	// End of SendRemoteFireLaser Method
+	
+	
+	//========================================================================
+	public string ClientID ()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		return PlayerPrefs.GetString("ClientID");
+		
+		//------------------------------------------------------
+	}	// End of ClientID Method
+	
+	
+	//========================================================================
+	public void MoveShipHorizontal (float sngValue)
+	{	// 
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oNetworkPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.MoveShipHorizontal(sngValue);
+			}
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.MoveShipHorizontal(sngValue);
+			}
+		}
+		
+		//------------------------------------------------------
+	}	// End of MoveShipHorizontal Method
+	
+	
+	//========================================================================
+	public void MoveShipVertical (float sngValue)
+	{	// 
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oNetworkPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.MoveShipVertical(sngValue);
+			}
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			m_oPlayerController = m_oPlayer.GetComponent<CPlayerController>();
+			
+			if (m_oPlayerController != null) 
+			{
+				m_oPlayerController.MoveShipVertical(sngValue);
+			}
+		}
+		
+		//------------------------------------------------------
+	}	// End of MoveShipVertical Method
+	
+	
+	//========================================================================
+	public bool IsClientID (string strClientID)
+	{	// Declare Variables
+		//------------------------------------------------------
+
+		bool bRet = false;
+
+		if (PlayerPrefs.GetString("ClientID") == strClientID) bRet = true;
+
+		return bRet;
+
+		//------------------------------------------------------
+	}	// End of ClientID Method
+	
+	
+	//========================================================================
+	public bool IsMasterClient()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		bool bRet = false;
+		
+		if (PlayerPrefs.GetInt("Master") == 1) bRet = true;
+		
+		return bRet;
+		
+		//------------------------------------------------------
+	}	// End of IsMasterClient Method
 	
 	
 	//========================================================================
@@ -162,57 +305,119 @@ public class CGameController : Photon.MonoBehaviour
 	
 	
 	//========================================================================
-	public void CreateNetworkPlayerObject (Vector3 oPosition_1, Vector3 oPosition_2, Quaternion oRotation)
+	public void CreateNetworkPlayerObject ()
 	{	// Declare Variables
 		//------------------------------------------------------
 
-		m_oPlayer_1 = (GameObject) Instantiate (Player_1, oPosition_1, oRotation);
-		m_oPlayer_2 = (GameObject) Instantiate (Player_2, oPosition_2, oRotation);
+		if (IsMasterClient()) 
+		{
+			m_oNetworkPlayer = (GameObject) PhotonNetwork.Instantiate("Player_1", TeamPosition_1, PlayerRotation, 0);
+		} 
+		else 
+		{
+			m_oNetworkPlayer = (GameObject) PhotonNetwork.Instantiate("Player_2", TeamPosition_2, PlayerRotation, 0);
+		}
 
 		//------------------------------------------------------
-		}	// End of CreateNetworkPlayerObject Method
+	}	// End of CreateNetworkPlayerObject Method
 	
 	
 	//========================================================================
 	IEnumerator SpawnWaves ()
 	{	// Declare Variables
 		//------------------------------------------------------
-		
+
+		bool bWaitForSync  = false;
+
 		PhotonNetwork.networkingPeer.NewSceneLoaded();
 		
 		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
 		{
 			m_bUpdate = true;
 			m_intSyncMainScene++;
+
+			GameOverText.text = "Transporting...";
 		}
 
-//		yield return new WaitForSeconds (StartWait);
-
-
-		while (true)
+		while (!bWaitForSync)
 		{
 			if(m_intSyncMainScene >= MAIN_SCENE_SYNCED)
 			{	// Wait for Main Scene to Synchronize
 				//----------------------------------------------
-				m_bUpdate = false;
+				m_bUpdate     = false;
+				bWaitForSync  = true;
 
-				for (int i = 0; i < HazardCount; i++)
-				{
-//					GameObject oHazard = Hazards [Random.Range (0, Hazards.Length)];
-//
-//					Vector3 spawnPosition = new Vector3 (Random.Range (-SpawnValues.x, SpawnValues.x), SpawnValues.y, SpawnValues.z);
-//					Quaternion spawnRotation = Quaternion.identity;
-//					Instantiate (oHazard, spawnPosition, spawnRotation);
+				if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+				{	// Team Player Mode
+					//--------------------------------------------------
+					if(IsMasterClient()) 
+						yield return new WaitForSeconds (10);
 
-					yield return new WaitForSeconds (SpawnWait);
+					else 
+						yield return new WaitForSeconds (10);
+
+					CreateNetworkPlayerObject ();
+					Debug.Log ("SpawnWaves()\nCreating Network Player...");
+				}
+				else
+				{	// Single Player Mode
+					//--------------------------------------------------
+					CreatePlayerObject (PlayerPosition, PlayerRotation);
+					Debug.Log ("SpawnWaves()\nCreating Single Player...");
 				}
 			}
 			
+			yield return new WaitForSeconds (StartWait);
+		}
+
+		GameOverText.text = "";
+
+		while (true)
+		{
+			for (int i = 0; i < HazardCount; i++)
+			{
+				if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+				{	// Team Player Mode
+					//--------------------------------------------------
+					if(IsMasterClient())
+					{
+						GameObject oHazard = Hazards [UnityEngine.Random.Range (0, Hazards.Length)];						
+						Vector3 spawnPosition = new Vector3 (UnityEngine.Random.Range (-SpawnValues.x, SpawnValues.x), SpawnValues.y, SpawnValues.z);
+						Quaternion spawnRotation = Quaternion.identity;
+
+						if(oHazard.tag == "Large_Asteroid")
+						{
+							PhotonNetwork.Instantiate ("Large Asteroid", spawnPosition, spawnRotation, 0);
+							Debug.Log ("Creating Large Asteroid...");
+						}
+						
+						if(oHazard.tag == "Small_Asteroid")
+						{
+							PhotonNetwork.Instantiate ("Small Asteroid", spawnPosition, spawnRotation, 0);
+							Debug.Log ("Creating Small Asteroid...");
+						}
+					}
+				}
+				else
+				{	// Single Player Mode
+					//--------------------------------------------------
+					GameObject oHazard = Hazards [UnityEngine.Random.Range (0, Hazards.Length)];
+	
+					Vector3 spawnPosition = new Vector3 (UnityEngine.Random.Range (-SpawnValues.x, SpawnValues.x), SpawnValues.y, SpawnValues.z);
+					Quaternion spawnRotation = Quaternion.identity;
+					Instantiate (oHazard, spawnPosition, spawnRotation);
+				}
+
+				yield return new WaitForSeconds (SpawnWait);
+			}
+
 			yield return new WaitForSeconds (WaveWait);
 
 			if (m_bGameOver)
 			{
-				PhotonNetwork.LoadLevel (CHomeController.HOME_SCENE_SCREEN);
+				yield return new WaitForSeconds (StartWait);
+
+				PhotonNetwork.LoadLevel (PlayerPrefs.GetInt("Home_Scene"));
 				break;
 			}
 		}
@@ -226,10 +431,10 @@ public class CGameController : Photon.MonoBehaviour
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		PhotonNetwork.networkingPeer.NewSceneLoaded();
-
 		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-		{
+		{	// Team Player Mode
+			//--------------------------------------------------
+			PhotonNetwork.networkingPeer.NewSceneLoaded();
 			m_bUpdate = true;
 			m_intSyncMainScene++;
 		}
@@ -239,112 +444,116 @@ public class CGameController : Photon.MonoBehaviour
 	
 
 	//========================================================================
+	public void SendRemoteSceneHasLoaded(int intSceneID)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("RemoteSceneHasLoaded", PhotonTargets.All, intSceneID);
+		}
+
+		//------------------------------------------------------
+	}	// End of SendRemoteSceneHasLoaded Method
+	
+	
+	//========================================================================
+	public void SendAckRemoteSceneHasLoaded(int intSceneID)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("AckRemoteSceneHasLoaded", PhotonTargets.All, intSceneID);
+		}
+		
+		//------------------------------------------------------
+	}	// End of RemoteSceneHasLoaded Method
+	
+	
+	//========================================================================
 	[RPC]
 	public void RemoteSceneHasLoaded(int intSceneID)
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if (intSceneID == CHomeController.MAIN_SCENE_SCREEN) 
+		if (!photonView.isMine && intSceneID == PlayerPrefs.GetInt("Main_Scene")) 
 		{
-			m_bUpdate = false;
 			m_intSyncMainScene++;
-			
-			Debug.Log ("RemoteSceneHasLoaded()\n" + PhotonNetwork.connectionStateDetailed.ToString ());
+
+			SendAckRemoteSceneHasLoaded(intSceneID);
 		}
 
 		//------------------------------------------------------
 	}	// End of RemoteSceneHasLoaded Method
 	
 	
-//	//========================================================================
-//	[RPC]
-//	public void SendPlayerInfo(Vector3 oPosition, Quaternion oRotation)
-//	{	// Declare Variables
-//		//------------------------------------------------------
-//		
-//		m_oPlayer_2.transform.position = (Vector3)stream.ReceiveNext();
-//		m_oPlayer_2.transform.rotation = (Quaternion)stream.ReceiveNext();
-//		if (intSceneID == CHomeController.MAIN_SCENE_SCREEN) 
-//		{
-//			m_bUpdate = false;
-//			m_intSyncMainScene++;
-//			
-//			Debug.Log ("RemoteSceneHasLoaded()\n" + PhotonNetwork.connectionStateDetailed.ToString ());
-//		}
-//		
-//		//------------------------------------------------------
-//	}	// End of RemoteSceneHasLoaded Method
+	//========================================================================
+	[RPC]
+	public void AckRemoteSceneHasLoaded(int intSceneID)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (photonView.isMine && intSceneID == PlayerPrefs.GetInt("Main_Scene")) 
+		{
+			m_bUpdate = false;
+		}
+		//------------------------------------------------------
+	}	// End of AckRemoteSceneHasLoaded Method
 	
 	
 	//========================================================================
 	public void AddScore (int newScoreValue)
 	{	// Declare Variables
 		//------------------------------------------------------
-		
-		m_intScore += newScoreValue;
-		UpdateScore ();
-		
+
+		if (!m_bGameOver) 
+		{
+			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+			{	// Team Player Mode
+				//--------------------------------------------------
+				if (IsMasterClient()) 
+				{
+					m_intScore += newScoreValue;
+				}
+				else
+				{
+					PhotonView oPhotonView = PhotonView.Get (this);
+					oPhotonView.RPC ("RemoteUpdateScore", PhotonTargets.All, newScoreValue);
+				}
+			}
+			else
+			{	// Single Player Mode
+				//--------------------------------------------------
+				m_intScore += newScoreValue;
+				ScoreText.text     = "Score: " + m_intScore;
+			}
+		}
+
 		//------------------------------------------------------
 	}	// End of AddScore Method
 	
 	
 	//========================================================================
-	public void DestroyBothShips()
+	[RPC]
+	public void RemoteUpdateScore(int intScore)
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		Instantiate (PlayerExplosion, m_oPlayer_1.transform.position, m_oPlayer_1.transform.rotation);
-		Destroy(m_oPlayer_1);
-
-		Instantiate (PlayerExplosion, m_oPlayer_2.transform.position, m_oPlayer_2.transform.rotation);
-		Destroy(m_oPlayer_2);
-
-//		GameObject playerControllerObject_1 = GameObject.FindGameObjectWithTag ("Player_1");		
-//		if (playerControllerObject_1 != null)
-//		{
-//			Instantiate (PlayerExplosion, playerControllerObject_1.transform.position, playerControllerObject_1.transform.rotation);
-//			Destroy(m_oPlayer_1);
-//		}
-//		
-//		GameObject playerControllerObject_2 = GameObject.FindGameObjectWithTag ("Player_2");
-//		if (playerControllerObject_2 != null)
-//		{
-//			Instantiate (PlayerExplosion, playerControllerObject_2.transform.position, playerControllerObject_2.transform.rotation);
-//			Destroy(m_oPlayer_2);
-//		}
-
-		GameOver();
-		
-		//------------------------------------------------------
-	}	// End of DestroyBothShips Method
-	
-	
-	//========================================================================
-	public void DestroyShip(string strTagName, GameObject oLazerBolt)
-	{	// Declare Variables
-		//------------------------------------------------------
-		
-		GameObject playerControllerObject = GameObject.FindGameObjectWithTag (strTagName);		
-		if (playerControllerObject != null)
+		if (!m_bGameOver) 
 		{
-			Instantiate (PlayerExplosion, playerControllerObject.transform.position, playerControllerObject.transform.rotation);
-			Destroy(playerControllerObject);
-			Destroy(oLazerBolt);
+			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+			{	// Team Player Mode
+				//--------------------------------------------------
+				if(!photonView.isMine)
+				{
+					m_intScore += intScore;
+				}
+			}
 		}
 
-		GameOver();
-		
-		//------------------------------------------------------
-	}	// End of DestroyShip Method
-	
-	
-	//========================================================================
-	void UpdateScore()
-	{	// Declare Variables
-		//------------------------------------------------------
-		
-		ScoreText.text = "Score: " + m_intScore;
-		
 		//------------------------------------------------------
 	}	// End of UpdateScore Method
 	
@@ -377,11 +586,77 @@ public class CGameController : Photon.MonoBehaviour
 		//------------------------------------------------------
 		
 		GameOverText.text = "Game Over!";
+		PlayerPrefs.SetInt("Terminate", 1);
 		m_bGameOver = true;
-		
+
+		SendRemoteGameOver ();
+
 		//------------------------------------------------------
 	}	// End of GameOver Method
 
 
+	//========================================================================
+	public void SendRemoteGameOver()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("RemoteGameOver", PhotonTargets.All, null);
+		}
+		
+		//------------------------------------------------------
+	}	// End of SendRemoteGameOver Method
+	
+	
+	//========================================================================
+	[RPC]
+	public void RemoteGameOver ()
+	{	// Declare Variables
+		//------------------------------------------------------
+
+		if (!photonView.isMine) 
+		{
+			GameOverText.text = "Game Over!";
+			PlayerPrefs.SetInt("Terminate", 1);
+			m_bGameOver = true;
+		}
+		
+		//------------------------------------------------------
+	}	// End of RemoteGameOver Method
+	
+	
 	//----------------------------------------------------------
 }	// End of CGameController Class
+
+
+
+
+
+//{
+//	
+//	PlayerPrefs.SetInt ("HiScore", scorevar);
+//	score1 = PlayerPrefs.GetInt("HiScore");
+//	
+//	PlayerPrefs.SetInt("Master", 0);
+//	PlayerPrefs.SetInt("Laser", 0);
+//	PlayerPrefs.SetString("ClientID", guidClientID.ToString());
+//	PlayerPrefs.SetString("Player", "Player_2");
+//	
+//	PlayerPrefs.SetInt("Home_Scene", HOME_SCENE_SCREEN);
+//	PlayerPrefs.SetInt("Main_Scene", MAIN_SCENE_SCREEN);
+//	
+//}
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+

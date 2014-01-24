@@ -8,34 +8,24 @@ public class CFireButtonPressed : CButtonTouchLogic
 {	// Declare Data Members
 	//----------------------------------------------------------
 	
-	private  CPlayerController  m_oPlayerController;
-	private  GameObject         m_oGameControllerObject;
+	private CGameController  m_oGameController;
 	
-	
+
 	//========================================================================
 	void Start ()
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-		{	// Team Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player_1");
-		}
-		else
-		{	// Single Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		GameObject gameControllerObject = GameObject.FindGameObjectWithTag ("GameController");
+		
+		if (gameControllerObject != null)
+		{
+			m_oGameController = gameControllerObject.GetComponent <CGameController>();
 		}
 		
-		if (m_oGameControllerObject != null)
+		if (m_oGameController == null)
 		{
-			m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
-		}
-		
-		if (m_oPlayerController == null)
-		{
-			Debug.Log ("Cannot find 'Player' script");
+			Debug.Log ("Cannot find 'GameController' script");
 		}
 		
 		//------------------------------------------------------
@@ -46,21 +36,62 @@ public class CFireButtonPressed : CButtonTouchLogic
 	void OnMouseDown()
 	{	// Declare Variables
 		//------------------------------------------------------
+		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteFireLaser(1);
+			m_oGameController.FireLaser(1);
+		}
 
-		if(m_oPlayerController != null) 
-			m_oPlayerController.FireLaser();
+		//------------------------------------------------------
+	}	// End of OnMouseDown Method
+	
+	
+	//========================================================================
+	void OnMouseUp()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteFireLaser(0);
+			m_oGameController.FireLaser(0);
+		}
 
 		//------------------------------------------------------
 	}	// End of OnMouseUp Method
 	
 	
 	//========================================================================
+	void OnTouchBegin()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteFireLaser(1);
+			m_oGameController.FireLaser(1);
+		}
+		
+
+		//------------------------------------------------------
+	}	// End of OnTouchBegin Method
+	
+	
+	//========================================================================
 	void OnTouchEnded()
 	{	// Declare Variables
 		//------------------------------------------------------
-
-		if(m_oPlayerController != null) 
-			m_oPlayerController.FireLaser();
+		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteFireLaser(0);
+			m_oGameController.FireLaser(0);
+		}
 		
 		//------------------------------------------------------
 	}	// End of OnTouchEnded Method
@@ -68,3 +99,22 @@ public class CFireButtonPressed : CButtonTouchLogic
 	
 	//----------------------------------------------------------
 }	// End of CFireButtonPressed Class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

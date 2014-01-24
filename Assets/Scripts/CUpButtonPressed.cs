@@ -8,8 +8,7 @@ public class CUpButtonPressed : CButtonTouchLogic
 {	// Declare Data Members
 	//----------------------------------------------------------
 	
-	private  CPlayerController  m_oPlayerController;
-	private  GameObject         m_oGameControllerObject;
+	private CGameController  m_oGameController;
 
 
 	//========================================================================
@@ -17,25 +16,16 @@ public class CUpButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-		{	// Team Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player_1");
-		}
-		else
-		{	// Single Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		GameObject gameControllerObject = GameObject.FindGameObjectWithTag ("GameController");
+		
+		if (gameControllerObject != null)
+		{
+			m_oGameController = gameControllerObject.GetComponent <CGameController>();
 		}
 		
-		if (m_oGameControllerObject != null)
+		if (m_oGameController == null)
 		{
-			m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
-		}
-		
-		if (m_oPlayerController == null)
-		{
-			Debug.Log ("Cannot find 'Player' script");
+			Debug.Log ("Cannot find 'GameController' script");
 		}
 		
 		//------------------------------------------------------
@@ -46,9 +36,14 @@ public class CUpButtonPressed : CButtonTouchLogic
 	void OnMouseDown()
 	{	// Declare Variables
 		//------------------------------------------------------
-		
-		if(m_oPlayerController != null) MoveShip(1);
-		
+
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteLaserControl(0);
+			MoveShip(1);
+		}
+
 		//------------------------------------------------------
 	}	// End of OnMouseUp Method
 	
@@ -58,8 +53,13 @@ public class CUpButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(0);
-		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteLaserControl(1);
+			MoveShip(0);
+		}
+
 		//------------------------------------------------------
 	}	// End of OnMouseUp Method
 	
@@ -69,8 +69,13 @@ public class CUpButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(1);
-		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteLaserControl(0);
+			MoveShip(1);
+		}
+
 		//------------------------------------------------------
 	}	// End of OnTouchBegin Method
 	
@@ -80,8 +85,13 @@ public class CUpButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(0);
-		
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteLaserControl(1);
+			MoveShip(0);
+		}
+
 		//------------------------------------------------------
 	}	// End of OnTouchEnded Method
 	
@@ -90,8 +100,8 @@ public class CUpButtonPressed : CButtonTouchLogic
 	void MoveShip(float sngValue)
 	{	// Declare Variables
 		//------------------------------------------------------
-		
-		m_oPlayerController.MoveShipVertical(sngValue);
+
+		m_oGameController.MoveShipVertical(sngValue);
 		
 		//------------------------------------------------------
 	}	// End of MoveShip Method

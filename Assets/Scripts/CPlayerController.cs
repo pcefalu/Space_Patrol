@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 using System.Collections;
 
@@ -29,12 +30,22 @@ public class CPlayerController : Photon.MonoBehaviour
 	public Transform         ShotSpawn;
 	public float             FireRate;
 	
-	private float            m_sngNextFire  = 0;
+	public GameObject        PlayerExplosion;
+	
+	private int              m_intFireLaser;
+	private int              m_intPrevFire;
+	
 	private float            m_sngHAxis     = 0;
 	private float            m_sngVAxis     = 0;
 
+//	private CharacterState   m_oCharacterState;
 	private CGameController  m_oGameController;
-
+	
+	private Vector3          m_oCorrectPlayerPos;
+	private Quaternion       m_oCorrectPlayerRot;
+	private Vector3          m_oProjectilePosition;
+	private Quaternion       m_oProjectileRotation;
+	
 	
 	//========================================================================
 	void Start ()
@@ -53,6 +64,12 @@ public class CPlayerController : Photon.MonoBehaviour
 			Debug.Log ("Cannot find 'GameController' script");
 		}
 		
+		m_intFireLaser     = 0;
+		m_intPrevFire      = 0;
+		
+		PlayerPrefs.SetInt ("Terminate", 0);
+		StartCoroutine (FireLaserBolts());
+
 		//------------------------------------------------------
 	}	// End of Start Method
 	
@@ -61,16 +78,88 @@ public class CPlayerController : Photon.MonoBehaviour
 	void Update ()
 	{	// Process the Fire Laser Bolt Requests
 		//------------------------------------------------------
-		
-		if (Input.GetButton("Fire1") && Time.time > m_sngNextFire) 
+
+		if (PhotonNetwork.connectionState == ConnectionState.Disconnected) 
 		{
-			FireLaser();
+//			if (photonView.isMine)
+//			{
+				if (Input.GetButton("Fire1")) 
+				{
+					m_intPrevFire = 1;
+					
+					FireLaser(1);
+//					SendRemoteFireLaser(1);
+				}
+				else
+				{
+					if(m_intPrevFire == 1)
+					{
+						m_intPrevFire = 0;
+						
+						FireLaser(0);
+//						SendRemoteFireLaser(0);
+					}
+				}
+//			}
 		}
-		
+
 		//------------------------------------------------------
 	}	// End of Update Method
 	
 
+	//========================================================================
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (stream.isWriting)
+		{	// We own this player: send the others our data
+			//--------------------------------------------------
+//			stream.SendNext((int)m_oCharacterState);
+			stream.SendNext(transform.position);
+			stream.SendNext(transform.rotation);
+		}
+		else
+		{	// Network player, receive data
+			//--------------------------------------------------
+//			this.m_oCharacterState    = (CharacterState)stream.ReceiveNext();
+			
+			this.m_oCorrectPlayerPos  = (Vector3) stream.ReceiveNext();
+			this.m_oCorrectPlayerRot  = (Quaternion) stream.ReceiveNext();
+		}
+		
+		//------------------------------------------------------
+	}	// End of OnPhotonSerializeView Method
+	
+	
+	//========================================================================
+	void FixedUpdate ()
+	{	// 
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			if (photonView.isMine)
+			{
+				MoveShip ();
+			}
+			else
+			{
+				transform.position = Vector3.Lerp(transform.position, this.m_oCorrectPlayerPos, Time.deltaTime * 10);
+				transform.rotation = Quaternion.Lerp(transform.rotation, this.m_oCorrectPlayerRot, Time.deltaTime * 10);
+			}
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			MoveShip ();
+		}
+
+		//------------------------------------------------------
+	}	// End of FixedUpdate Method
+	
+	
 	//========================================================================
 	void OnTriggerEnter (Collider other)
 	{	// Declare Variables
@@ -83,67 +172,230 @@ public class CPlayerController : Photon.MonoBehaviour
 			{
 				if (other.tag == "Player_1" || other.tag == "Player_2")
 				{
-					m_oGameController.DestroyBothShips();
+					CreateExplosion ("explosion_player", PlayerExplosion, transform.position, transform.rotation);
+					CreateExplosion ("explosion_player", PlayerExplosion, other.transform.position, other.transform.rotation);
+					DestroyComponent(gameObject);
+					DestroyComponent(other.gameObject);
 				}
 				else
 				{
-					m_oGameController.DestroyShip(other.tag, gameObject);
+					CreateExplosion ("explosion_player", PlayerExplosion, other.transform.position, other.transform.rotation);
+					DestroyComponent(gameObject);
+					DestroyComponent(other.gameObject);
 				}
 			}
 			else
 			{
-				m_oGameController.DestroyShip(gameObject.tag, other.gameObject);
+				CreateExplosion ("explosion_player", PlayerExplosion, transform.position, transform.rotation);
+				DestroyComponent(gameObject);
+				DestroyComponent(other.gameObject);
 			}
+			
+			if (m_oGameController != null) 
+				m_oGameController.GameOver();
 		}
 
 		//------------------------------------------------------
 	}	// End of OnTriggerEnter Method
 	
+
+	//========================================================================
+	void CreateExplosion (string strComponent, UnityEngine.Object oExplosion, Vector3 oPosition, Quaternion oRotation)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonNetwork.Instantiate(strComponent, oPosition, oRotation, 0);
+		}
+		else
+		{
+			Instantiate(oExplosion, oPosition, oRotation);
+		}
+		
+		//------------------------------------------------------
+	}	// End of CreateExplosion Method
+	
 	
 	//========================================================================
-	public void FireLaser ()
-	{	// Process the Fire Laser Bolt Requests
+	void DestroyComponent (GameObject oComponent)
+	{	// Declare Variables
 		//------------------------------------------------------
 
-		if (gameObject.tag == "Player" || gameObject.tag == "Player_1") 
-		{	// Local Player Processing
-			//--------------------------------------------------
-			m_sngNextFire = Time.time + FireRate;
-			Instantiate (Shot, ShotSpawn.position, ShotSpawn.rotation);
-			audio.Play ();
-		}
-		else 
-		{	// Network Player Processing
-			//--------------------------------------------------
-			
+		if (oComponent != null) 
+		{
+			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+			{
+				PhotonNetwork.Destroy(oComponent);
+			}
+			else
+			{
+				Destroy(oComponent);
+			}
 		}
 
+		//------------------------------------------------------
+	}	// End of CreateExplosion Method
+	
+	
+	//========================================================================
+	public void DestroyShip()
+	{	// Declare Variables
+		//------------------------------------------------------
+
+		if (gameObject != null) 
+		{
+			CreateExplosion ("explosion_player", PlayerExplosion, transform.position, transform.rotation);
+			DestroyComponent(gameObject);
+			
+			if (m_oGameController != null) 
+				m_oGameController.GameOver();
+		}
+
+		//------------------------------------------------------
+	}	// End of DestroyShip Method
+	
+	
+	//========================================================================
+	public void FireLaser(int intState)
+	{	// 
+		//------------------------------------------------------
+		
+		m_intFireLaser = intState;
+		
 		//------------------------------------------------------
 	}	// End of FireLaser Method
 	
 	
 	//========================================================================
-	public float NextFire ()
-	{	// Process the Fire Laser Bolt Requests
-		//------------------------------------------------------
-		
-		return m_sngNextFire;
-		
-		//------------------------------------------------------
-	}	// End of NextFire Method
-	
-	
-	//========================================================================
-	void FixedUpdate ()
+	public int getFireLaser()
 	{	// 
 		//------------------------------------------------------
 		
-		MoveShip ();
+		return m_intFireLaser;
+		
+		//------------------------------------------------------
+	}	// End of getFireLaser Method
+	
+	
+	//========================================================================
+	public void SendRemoteFireLaser(int intFireLaser)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("RemoteFireLaser", PhotonTargets.All, intFireLaser);
+		}
+		
+		//------------------------------------------------------
+	}	// End of SendRemoteFireLaser Method
+	
+	
+	//========================================================================
+	public void SendRemoteLaserControl(int intState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("RemoteLaserControl", PhotonTargets.All, intState);
+		}
+		
+		//------------------------------------------------------
+	}	// End of SendRemoteLaserControl Method
+	
+	
+	//========================================================================
+	[RPC]
+	public void RemoteFireLaser(int intFireLaser)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (!photonView.isMine) 
+		{	
+			PlayerPrefs.SetInt("Laser", intFireLaser);
+			FireLaser(intFireLaser);
+		}
+		
+		//------------------------------------------------------
+	}	// End of RemoteFireLaser Method
+	
+	
+	//========================================================================
+	[RPC]
+	public void RemoteLaserControl(int intState)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (!photonView.isMine) 
+		{	
+			PlayerPrefs.SetInt("Laser", intState);
+		}
+		
+		//------------------------------------------------------
+	}	// End of RemoteLaserControl Method
+	
+	
+	//========================================================================
+	IEnumerator FireLaserBolts()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		while (PlayerPrefs.GetInt("Terminate") == 0)
+		{
+			if(getFireLaser() == 1)
+			{	// Rapid Fire Laser
+				//----------------------------------------------
+				if(PlayerPrefs.GetInt("Laser") == 1)
+				{
+					Instantiate (Shot, ShotSpawn.position, ShotSpawn.rotation);
+					audio.Play ();
+				}
+			}
+			
+			yield return new WaitForSeconds (FireRate);
+		}
+		
+		//------------------------------------------------------
+	}	// End of FireLaserBolts Method
+	
+	
+	//========================================================================
+	public void SendRemoteMoveShip (Vector3 oPosition, Vector3 oVelocity, Quaternion oRotation)
+	{	// 
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonView oPhotonView = PhotonView.Get (this);
+			oPhotonView.RPC ("RemoteMoveShip", PhotonTargets.All, oPosition, oVelocity, oRotation);
+		}
 
 		//------------------------------------------------------
-	}	// End of FixedUpdate Method
-
-
+	}	// End of SendRemoteMoveShip Method
+	
+	
+	//========================================================================
+	[RPC]
+	public void RemoteMoveShip (Vector3 oPosition, Vector3 oVelocity, Quaternion oRotation)
+	{	// 
+		//------------------------------------------------------
+		
+		if (!photonView.isMine) 
+		{	// Remote Player Processing
+			//--------------------------------------------------
+			rigidbody.velocity  = oVelocity;
+			rigidbody.position  = oPosition;
+			rigidbody.rotation  = oRotation;
+		} 
+		
+		//------------------------------------------------------
+	}	// End of RemoteMoveShip Method
+	
+	
 	//========================================================================
 	public void MoveShipHorizontal (float sngValue)
 	{	// 
@@ -168,34 +420,33 @@ public class CPlayerController : Photon.MonoBehaviour
 	
 	//========================================================================
 	public void MoveShip ()
-	{	// 
+	{	// Player Processing
 		//------------------------------------------------------
+
+		float sngMoveHorizontal  = InputGetAxis ("Horizontal");
+		float sngMoveVertical    = InputGetAxis ("Vertical");
+
+		Vector3 sngMovement      = new Vector3 (sngMoveHorizontal, 0.0f, sngMoveVertical);
+		Vector3 oVelocity        = sngMovement * Speed;
+		rigidbody.velocity       = oVelocity;
+
+		Vector3 oPosition = new Vector3
+			(
+				Mathf.Clamp (rigidbody.position.x, Boundary.XMin, Boundary.XMax), 
+				0.0f, 
+				Mathf.Clamp (rigidbody.position.z, Boundary.ZMin, Boundary.ZMax)
+			);
 		
+		rigidbody.position    = oPosition;
 		
-		if (gameObject.tag == "Player" || gameObject.tag == "Player_1") 
-		{	// Local Player Processing
-			//--------------------------------------------------
-			float sngMoveHorizontal = InputGetAxis ("Horizontal");
-			float sngMoveVertical = InputGetAxis ("Vertical");
+		Quaternion oRotation  = Quaternion.Euler (0.0f, 0.0f, rigidbody.velocity.x * -Tilt);
+		rigidbody.rotation    = oRotation;
 
-			Vector3 sngMovement = new Vector3 (sngMoveHorizontal, 0.0f, sngMoveVertical);
-			rigidbody.velocity = sngMovement * Speed;
-
-			rigidbody.position = new Vector3
-				(
-					Mathf.Clamp (rigidbody.position.x, Boundary.XMin, Boundary.XMax), 
-					0.0f, 
-					Mathf.Clamp (rigidbody.position.z, Boundary.ZMin, Boundary.ZMax)
-				);
-			
-			rigidbody.rotation = Quaternion.Euler (0.0f, 0.0f, rigidbody.velocity.x * -Tilt);
-		} 
-		else 
-		{	// Network Player Processing
-			//--------------------------------------------------
-
+		if (PlayerPrefs.GetInt("Master") == 0 && PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			SendRemoteMoveShip(oPosition, oVelocity, oRotation);
 		}
-		
+
 		//------------------------------------------------------
 	}	// End of MoveShip Method
 	
@@ -224,3 +475,19 @@ public class CPlayerController : Photon.MonoBehaviour
 	
 	//----------------------------------------------------------
 }	// End of CPlayerController Class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

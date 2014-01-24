@@ -8,6 +8,60 @@ using System.Collections;
 public class CButtonTouchLogic : Photon.MonoBehaviour 
 {	// Declare Data Members
 	//----------------------------------------------------------
+
+	private  bool               m_bDone;
+
+	public   CPlayerController  m_oPlayerController;
+	public   GameObject         m_oGameControllerObject;
+	
+
+	//========================================================================
+	void Start ()
+	{	// Declare Variables
+		//------------------------------------------------------
+
+		m_bDone = false;
+
+		StartCoroutine (InitializeObjects());
+
+		//------------------------------------------------------
+	}	// End of Start Method
+	
+	
+	//========================================================================
+	IEnumerator InitializeObjects ()
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		while (!m_bDone)
+		{
+			if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+			{	// Team Player Mode
+				//--------------------------------------------------
+				m_oGameControllerObject = GameObject.FindGameObjectWithTag (PlayerPrefs.GetString ("Player"));
+			}
+			else
+			{	// Single Player Mode
+				//--------------------------------------------------
+				m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+			}
+			
+			if (m_oGameControllerObject != null)
+			{
+				m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
+			}
+			
+			if (m_oGameControllerObject != null && m_oPlayerController != null)
+			{
+				m_bDone = true;
+			}
+
+			yield return new WaitForSeconds (1);
+		}
+
+		//------------------------------------------------------
+	}	// End of InitializeObjects Method
+	
 	
 	//========================================================================
 	void Update()

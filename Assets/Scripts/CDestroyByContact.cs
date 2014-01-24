@@ -36,6 +36,42 @@ public class CDestroyByContact : Photon.MonoBehaviour
 
 	
 	//========================================================================
+	void CreateExplosion (string strComponent, Object oExplosion, Vector3 oPosition, Quaternion oRotation)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonNetwork.Instantiate(strComponent, oPosition, oRotation, 0);
+		}
+		else
+		{
+			Instantiate(oExplosion, oPosition, oRotation);
+		}
+		
+		//------------------------------------------------------
+	}	// End of CreateExplosion Method
+	
+	
+	//========================================================================
+	void DestroyComponent (GameObject oComponent)
+	{	// Declare Variables
+		//------------------------------------------------------
+		
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{
+			PhotonNetwork.Destroy(oComponent);
+		}
+		else
+		{
+			Destroy(oComponent);
+		}
+		
+		//------------------------------------------------------
+	}	// End of CreateExplosion Method
+	
+	
+	//========================================================================
 	void OnTriggerEnter (Collider other)
 	{	// Declare Variables
 		//------------------------------------------------------
@@ -47,25 +83,25 @@ public class CDestroyByContact : Photon.MonoBehaviour
 			{
 				if (other.tag == "Large_Asteroid")
 				{
-					Instantiate(Explosion, transform.position, transform.rotation);
-					Destroy (gameObject);
+					CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
+					DestroyComponent(gameObject);
 				}
 				else
 				{
 					if (other.tag == "Player")
 					{
-						Instantiate(Explosion, transform.position, transform.rotation);
-						Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
+						CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
+						CreateExplosion ("explosion_player", PlayerExplosion, other.transform.position, other.transform.rotation);
 						m_oGameController.GameOver();
 					}
 					else
 					{
-						Instantiate(Explosion, transform.position, transform.rotation);
+						CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
 						m_oGameController.AddScore(10);
 					}
 					
-					Destroy (other.gameObject);
-					Destroy (gameObject);
+					DestroyComponent (other.gameObject);
+					DestroyComponent (gameObject);
 				}
 			}
 
@@ -73,25 +109,25 @@ public class CDestroyByContact : Photon.MonoBehaviour
 			{
 				if (other.tag == "Small_Asteroid")
 				{
-					Instantiate(Explosion, transform.position, transform.rotation);
-					Destroy (other.gameObject);
+					CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
+					DestroyComponent (other.gameObject);
 				}
 				else
 				{
 					if (other.tag == "Player" || other.tag == "Player_1" || other.tag == "Player_2")
 					{
-						Instantiate(Explosion, transform.position, transform.rotation);
-						Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
+						CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
+						CreateExplosion ("explosion_player", PlayerExplosion, other.transform.position, other.transform.rotation);
 						m_oGameController.GameOver();
 					}
 					else
 					{
-						Instantiate(Explosion, transform.position, transform.rotation);
+						CreateExplosion ("explosion_asteroid", Explosion, transform.position, transform.rotation);
 						m_oGameController.AddScore(10);
 					}
 					
-					Destroy (other.gameObject);
-					Destroy (gameObject);
+					DestroyComponent (other.gameObject);
+					DestroyComponent (gameObject);
 				}
 			}
 			
@@ -99,12 +135,12 @@ public class CDestroyByContact : Photon.MonoBehaviour
 			{
 				if (other.tag == "Player_1" || other.tag == "Player_2")
 				{
-					Instantiate(PlayerExplosion, transform.position, transform.rotation);
-					Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
+					CreateExplosion ("explosion_player", PlayerExplosion, transform.position, transform.rotation);
+					CreateExplosion ("explosion_player", PlayerExplosion, other.transform.position, other.transform.rotation);
 					m_oGameController.GameOver();
 					
-					Destroy (other.gameObject);
-					Destroy (gameObject);
+					DestroyComponent (other.gameObject);
+					DestroyComponent (gameObject);
 				}
 			}
 		}

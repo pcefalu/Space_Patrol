@@ -19,9 +19,9 @@ public class CHomeController : Photon.MonoBehaviour
 	private bool          m_bGameOver;
 	private bool          m_bRestart;
 	
-	public const int HOME_SCENE_SCREEN = 0;
-	public const int MAIN_SCENE_SCREEN = 1;
-	
+	private const int HOME_SCENE_SCREEN   = 0;
+	private const int MAIN_SCENE_SCREEN   = 1;
+
 
 	//========================================================================
 	void Start ()
@@ -33,7 +33,10 @@ public class CHomeController : Photon.MonoBehaviour
 		m_bDisableButtons  = false;
 
 		StartCoroutine (SpawnWaves ());
-		
+			
+		PlayerPrefs.SetInt("Home_Scene", HOME_SCENE_SCREEN);
+		PlayerPrefs.SetInt("Main_Scene", MAIN_SCENE_SCREEN);
+			
 		//------------------------------------------------------
 	}	// End of Start Method
 	
@@ -43,7 +46,6 @@ public class CHomeController : Photon.MonoBehaviour
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-//		yield return new WaitForSeconds (StartWait);
 		while (true)
 		{
 			for (int i = 0; i < HazardCount; i++)
@@ -60,7 +62,7 @@ public class CHomeController : Photon.MonoBehaviour
 
 			if (m_bGameOver)
 			{
-				PhotonNetwork.LoadLevel(MAIN_SCENE_SCREEN);
+				PhotonNetwork.LoadLevel(PlayerPrefs.GetInt("Main_Scene"));
 				break;
 			}
 			
@@ -78,9 +80,13 @@ public class CHomeController : Photon.MonoBehaviour
 	void OnLevelWasLoaded (int level)
 	{	// Declare Variables
 		//------------------------------------------------------
-		
-		PhotonNetwork.networkingPeer.NewSceneLoaded();
-		
+
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			PhotonNetwork.networkingPeer.NewSceneLoaded();
+		}
+
 		//------------------------------------------------------
 	}	// End of OnLevelWasLoaded Method
 	

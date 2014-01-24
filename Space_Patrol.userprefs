@@ -1,12 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CGameController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CPlayerController.cs">
     <Files>
-      <File FileName="Assets/Scripts/CPlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CPlayerController.cs" Line="347" Column="13" />
       <File FileName="Assets/Scripts/CFireButtonPressed.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/CGameController.cs" Line="151" Column="24" />
+      <File FileName="Assets/Scripts/CGameController.cs" Line="220" Column="1" />
       <File FileName="Assets/Scripts/CDestroyByBoundry.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/CHomeController.cs" Line="88" Column="1" />
+      <File FileName="Assets/Scripts/CHomeController.cs" Line="66" Column="1" />
       <File FileName="Assets/Scripts/CLeftButtonPressed.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/CButtonTouchLogic.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/CRightButtonPressed.cs" Line="1" Column="1" />
@@ -24,12 +24,14 @@
       <File FileName="Assets/Photon Unity Networking/Plugins/PhotonNetwork/PhotonLagSimulationGui.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/CExitGameButton.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/CCancelWaitButton.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/CSinglePlayerMode.cs" Line="14" Column="1" />
-      <File FileName="Assets/Scripts/CTeamPlayerMode.cs" Line="117" Column="5" />
+      <File FileName="Assets/Scripts/CSinglePlayerMode.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CTeamPlayerMode.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/CExitGameMode.cs" Line="1" Column="1" />
       <File FileName="Assets/Photon Unity Networking/Demos/MarcoPolo-Tutorial/ClickDetector.cs" Line="1" Column="1" />
       <File FileName="Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewInspector.cs" Line="1" Column="1" />
       <File FileName="Assets/Photon Unity Networking/Editor/PhotonNetwork/ServerSettingsInspector.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CDataRecordInfo.cs" Line="1" Column="1" />
+      <File FileName="Assets/Photon Unity Networking/Plugins/PhotonNetwork/NetworkingPeer.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

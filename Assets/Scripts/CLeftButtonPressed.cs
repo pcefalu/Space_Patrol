@@ -8,8 +8,7 @@ public class CLeftButtonPressed : CButtonTouchLogic
 {	// Declare Data Members
 	//----------------------------------------------------------
 	
-	private  CPlayerController  m_oPlayerController;
-	private  GameObject         m_oGameControllerObject;
+	private CGameController  m_oGameController;
 	
 	
 	//========================================================================
@@ -17,25 +16,16 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
-		{	// Team Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player_1");
-		}
-		else
-		{	// Single Player Mode
-			//--------------------------------------------------
-			m_oGameControllerObject = GameObject.FindGameObjectWithTag ("Player");
+		GameObject gameControllerObject = GameObject.FindGameObjectWithTag ("GameController");
+		
+		if (gameControllerObject != null)
+		{
+			m_oGameController = gameControllerObject.GetComponent <CGameController>();
 		}
 		
-		if (m_oGameControllerObject != null)
+		if (m_oGameController == null)
 		{
-			m_oPlayerController = m_oGameControllerObject.GetComponent <CPlayerController>();
-		}
-		
-		if (m_oPlayerController == null)
-		{
-			Debug.Log ("Cannot find 'Player' script");
+			Debug.Log ("Cannot find 'GameController' script");
 		}
 		
 		//------------------------------------------------------
@@ -47,10 +37,15 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(-1);
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteLaserControl(0);
+			MoveShip(-1);
+		}
 		
 		//------------------------------------------------------
-	}	// End of OnMouseUp Method
+	}	// End of OnMouseDown Method
 	
 	
 	//========================================================================
@@ -58,7 +53,12 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(0);
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteLaserControl(1);
+			MoveShip(0);
+		}
 		
 		//------------------------------------------------------
 	}	// End of OnMouseUp Method
@@ -69,7 +69,12 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(-1);
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 0);
+			m_oGameController.SendRemoteLaserControl(0);
+			MoveShip(-1);
+		}
 		
 		//------------------------------------------------------
 	}	// End of OnTouchBegin Method
@@ -80,7 +85,12 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		if(m_oPlayerController != null) MoveShip(0);
+		if (m_oGameController != null) 
+		{
+			PlayerPrefs.SetInt("Laser", 1);
+			m_oGameController.SendRemoteLaserControl(1);
+			MoveShip(0);
+		}
 		
 		//------------------------------------------------------
 	}	// End of OnTouchEnded Method
@@ -91,7 +101,7 @@ public class CLeftButtonPressed : CButtonTouchLogic
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		m_oPlayerController.MoveShipHorizontal(sngValue);
+		m_oGameController.MoveShipHorizontal(sngValue);
 
 		//------------------------------------------------------
 	}	// End of MoveShip Method

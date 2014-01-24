@@ -123,6 +123,7 @@
      <Compile Include="Assets\Photon Unity Networking\UtilityScripts\TimeKeeper.cs" />
      <Compile Include="Assets\Scripts\CButtonTouchLogic.cs" />
      <Compile Include="Assets\Scripts\CCancelWaitButton.cs" />
+     <Compile Include="Assets\Scripts\CDataRecordInfo.cs" />
      <Compile Include="Assets\Scripts\CDestroyByBoundry.cs" />
      <Compile Include="Assets\Scripts\CDestroyByContact.cs" />
      <Compile Include="Assets\Scripts\CDestroyByTime.cs" />

@@ -36,7 +36,19 @@ public class CDestroyByBoundry : Photon.MonoBehaviour
 	{	// Declare Variables
 		//------------------------------------------------------
 		
-		Destroy(other.gameObject);
+		if (PhotonNetwork.connectionState == ConnectionState.Connected) 
+		{	// Team Player Mode
+			//--------------------------------------------------
+			if(m_oGameController.IsMasterClient())
+			{
+				PhotonNetwork.Destroy(other.gameObject);
+			}
+		}
+		else
+		{	// Single Player Mode
+			//--------------------------------------------------
+			Destroy(other.gameObject);
+		}
 
 		if(other.tag != "Laser_Bolt") 
 			m_oGameController.AddScore(-20);
@@ -44,6 +56,6 @@ public class CDestroyByBoundry : Photon.MonoBehaviour
 		//------------------------------------------------------
 	}	// End of OnTriggerExit Method
 	
-	
+
 	//----------------------------------------------------------
 }	// End of CDestroyByBoundry Class

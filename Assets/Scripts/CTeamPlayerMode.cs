@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 using System.Collections;
 
@@ -15,8 +16,9 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 	private  bool             m_bInstantiatedAvatars;
 	private  CHomeController  m_oHomeController;
 
-	private const int MAX_NUMBER_OF_PLAYERS = 2;
-	
+	private const int MAX_TEAM_OF_PLAYERS    = 2;
+	private const int MAX_NUMBER_OF_PLAYERS  = 4;
+
 	
 	//========================================================================
 	void Start ()
@@ -87,7 +89,7 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 		
 		Debug.Log ("OnPhotonRandomJoinFailed()\n" + PhotonNetwork.connectionStateDetailed.ToString ());
 		PhotonNetwork.CreateRoom(null, true, true, MAX_NUMBER_OF_PLAYERS);
-		
+
 		//------------------------------------------------------
 	}	// End of MultiPlayer Method
 	
@@ -112,8 +114,14 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 		
 		Debug.Log ("OnJoinedRoom()\n" + PhotonNetwork.connectionStateDetailed.ToString ());
 		
-		if (PhotonNetwork.countOfPlayers == MAX_NUMBER_OF_PLAYERS) 
+		if (PhotonNetwork.countOfPlayers == MAX_TEAM_OF_PLAYERS) 
 		{
+			Guid guidClientID = System.Guid.NewGuid();
+			
+			PlayerPrefs.SetInt("Master", 0);
+			PlayerPrefs.SetString("ClientID", guidClientID.ToString());
+			PlayerPrefs.SetString("Player", "Player_2");
+
 			BeginGame();
 		}
 		else
@@ -122,7 +130,11 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 			m_bWaitForPlayer        = true;
 			m_bInstantiatedAvatars  = true;
 			
-			Debug.Log ("OnJoinedRoom()\n" + "I am alone in the Room...");
+			Guid guidClientID = System.Guid.NewGuid();
+			
+			PlayerPrefs.SetInt("Master", 1);
+			PlayerPrefs.SetString("ClientID", guidClientID.ToString());
+			PlayerPrefs.SetString("Player", "Player_1");
 		}
 		
 		//------------------------------------------------------
@@ -173,6 +185,8 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 		m_bInstantiatedAvatars  = false;
 		m_oHomeController.GameOver ();
 		
+		Debug.Log ("BeginGame()\n");
+
 		//------------------------------------------------------
 	}	// End of BeginGame Method
 	
@@ -193,6 +207,8 @@ public class CTeamPlayerMode : Photon.MonoBehaviour
 		
 		m_oHomeController.SetDisableButtons(false);
 		
+		Debug.Log ("CancelWait()\n");
+
 		//------------------------------------------------------
 	}	// End of CancelWait Method
 	
